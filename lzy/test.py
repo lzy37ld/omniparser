@@ -95,7 +95,6 @@ print('image size:', image.size)
 
 
 
-
 box_overlay_ratio = max(image.size) / 3200
 draw_bbox_config = {
     'text_scale': 0.8 * box_overlay_ratio,
@@ -106,7 +105,7 @@ draw_bbox_config = {
 BOX_TRESHOLD = 0.05
 
 
-easyocr_args={'paragraph': False, 'text_threshold':0.8, 'width_ths':1.0}
+easyocr_args={'paragraph': True, 'text_threshold':0.7, 'width_ths':20.0}
 
 
 ocr_bbox_rslt, is_goal_filtered = check_ocr_box(
@@ -120,9 +119,18 @@ ocr_bbox_rslt, is_goal_filtered = check_ocr_box(
 text, ocr_bbox = ocr_bbox_rslt
 
 
+
+# 将easyocr_args转换为列表格式并拼接到output_path
+easyocr_list = [f"{k}_{v}" for k, v in easyocr_args.items()]
+easyocr_suffix = "_".join(easyocr_list)
+output_path = f'./annotated_image_{easyocr_suffix}.png'
+
+
+
 # 调用函数绘制OCR bounding box
 if ocr_bbox and text:
-    draw_ocr_boxes_and_save(image_path, ocr_bbox, text)
+    draw_ocr_boxes_and_save(image_path, ocr_bbox, text, output_path)
+    print("need batch processing")
 else:
     print("No OCR bounding boxes found!")
 
