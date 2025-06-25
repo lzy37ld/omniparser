@@ -1,0 +1,10 @@
+{
+    "expressions": [
+        "Select the entire code block immediately below the README/Apache-2.0 tabs that shows the list of bounding-box coordinates and recognized text strings.",
+        "Select the three consecutive paragraphs labeled “Note 1:”, “Note 2:”, and “Note 3:” directly beneath that code block.",
+        "Select the single line of code just below Note 3 that reads reader.readtext('chinese.jpg', detail = 0).",
+        "Select the code block under the “Result:” label showing the list ['愚园路', '西', '东', '315', '309', 'Yuyuan Rd.', 'W', 'E'].",
+        "Select the paragraph beginning with \"Model weights for the chosen language will be automatically downloaded...” located just below the result block.",
+        "Select the final sentence at the bottom of the page that starts with \"In case you do not have a GPU,\" and ends with \"gpu=False.\"."
+    ]
+}

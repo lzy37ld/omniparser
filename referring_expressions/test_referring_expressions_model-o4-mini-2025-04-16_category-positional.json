@@ -1,0 +1,11 @@
+{
+    "expressions": [
+        "Select the entire code snippet at the very top of the README (the bracketed list of bounding boxes and text).",
+        "Select the full paragraph immediately below the code snippet that begins with “Note 1: ['ch_sim','en'] is the list of languages you want to read.”",
+        "Select the standalone sentence that reads “You can also set detail=0 for simpler output.”",
+        "Select the single line of code directly below that sentence, namely “reader.readtext('chinese.jpg', detail = 0)”",
+        "Select the array under the “Result:” heading (the line starting with “['愚园路', '西', '东', '315', '309', 'Yuyuan Rd.', 'W', 'E']”).",
+        "Select the paragraph immediately below the result array that starts with “Model weights for the chosen language will be automatically downloaded…”.",
+        "Select the final sentence at the bottom of the page that begins with “In case you do not have a GPU, or your GPU has low memory…” and ends with “gpu=False.”"
+    ]
+}

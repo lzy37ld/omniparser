@@ -1,0 +1,17 @@
+{
+    "0": "GitHub - JaidedAI/Easyo *",
+    "1": "6 7  C",
+    "2": "2 github com/JaidedAIJEasyOcR",
+    "3": "C * :  Relaunch to",
+    "4": "README   t Apache-2.0 license",
+    "5": "[([[189, 75], [469, 75], [469, 165], [189, 165]], 'BEE' , 0.3754989504814148) , ([[86, 80], [134, 80], [134, 128], [86, 128]], '@', 0.40452659130096436) , ([[517, 81], [565, 81], [565, 123], [517, 123]], 'F', 0.9989598989486694) , ([[78, 126], [136, 126], [136, 156], [78, 156]], '315' , 0.8125889301300049) 156] ] , ([[514, 126], [574, 126], [574, 156], [514, 156]], '309' , 0.4971577227115631) , ([[226, 170], [414, 170], [414, 220], [226, 220]], 'Yuyuan Rd. ' , 0.8261902332305908) , ([[79, 173], [125, 173], [125, 213], [79, 213]], 'W' , 0.9848111271858215) , ([[529, 173], [569, 173], [569, 213], [529, 213]], 'E' , 0.8405593633651733) ]",
+    "6": "Note 1: [ 'ch_Sim' , 'en'] is the list of languages you want to read: You can pass several languages at once but not all languages can be used together. English is compatible with every language and languages that share common characters are usually compatible with each other.",
+    "7": "Note 2: Instead of the filepath chinese. Jpg , YoU can also pass an OpenCV image object (numpy array) or an image file as bytes A URL to a raw image is also acceptable",
+    "8": "Note 3: The line reader easyocr. Reader ( [ 'ch_Sim' , 'en'1) is for loading a model into memory: It takes some time but it needs to be run only once",
+    "9": "You can also set detail-0 for simpler output:",
+    "10": "reader.readtext ( 'chinese. Jpg' , detail = 0",
+    "11": "Result:",
+    "12": "['BBZ '_ '6', '#', '315' , '309' , 'Yuyuan Rd. ' , 'W', 'E']",
+    "13": "Model weights for the chosen language will be automatically downloaded or you can download them manually from the model hub and put them in the '~/ EasyOCRImodel' folder",
+    "14": "In case you do not have a GPU, or your GPU has Iow memory. You can run the model in CPU-only mode by adding gpu-False"
+}

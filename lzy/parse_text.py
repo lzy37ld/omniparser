@@ -12,6 +12,8 @@ import torch
 from torchvision.ops import box_convert
 from util.utils import get_som_labeled_img, check_ocr_box, get_caption_model_processor, get_yolo_model
 from util.box_annotator import BoxAnnotator
+from argparse import ArgumentParser
+import json
 
 
 
@@ -77,63 +79,86 @@ def draw_ocr_boxes_and_save(image_path, ocr_bbox, ocr_text, output_path='./annot
 
 
 
-# importlib.reload(utils)
-# from utils import get_som_labeled_img, check_ocr_box, get_caption_model_processor, get_yolo_model
+def main(args):
+    image_path = args.image_path
+    mode = args.mode
 
-image_path = 'imgs/google_page.png'
-image_path = 'imgs/windows_home.png'
-# image_path = 'imgs/windows_multitab.png'
-# image_path = 'imgs/omni3.jpg'
-# image_path = 'imgs/ios.png'
-image_path = 'imgs/word.png'
-# image_path = 'imgs/excel2.png'
-image_path = 'lzy/test.png'
+    image = Image.open(image_path)
+    image_rgb = image.convert('RGB')
+    print('image size:', image.size)
 
-image = Image.open(image_path)
-image_rgb = image.convert('RGB')
-print('image size:', image.size)
+    # 获取项目根目录（无论从哪个位置运行脚本）
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    
+    # 创建输出目录
+    output_dir_img = os.path.join(project_root, 'parsed_text_images')
+    os.makedirs(output_dir_img, exist_ok=True)
+    output_dir_text = os.path.join(project_root, 'parsed_text_text')
+    os.makedirs(output_dir_text, exist_ok=True)
+    
+    # 获取输入图片的文件名（不含扩展名）
+    input_filename = os.path.splitext(os.path.basename(image_path))[0]
+    
+    # 构建输出路径：项目根目录/parsed_text_images/原文件名_mode.png
+    output_path = os.path.join(output_dir_img, f'{input_filename}_mode-{mode}.png')
 
+    box_overlay_ratio = max(image.size) / 3200
+    draw_bbox_config = {
+        'text_scale': 0.8 * box_overlay_ratio,
+        'text_thickness': max(int(2 * box_overlay_ratio), 1),
+        'text_padding': max(int(3 * box_overlay_ratio), 1),
+        'thickness': max(int(3 * box_overlay_ratio), 1),
+    }
+    BOX_TRESHOLD = 0.05
 
+    mode_to_args = {
+        "paragraph": {'paragraph': True, 'text_threshold':0.7, 'width_ths':20.0},
+        "word": {'paragraph': False, 'text_threshold':0.7, 'width_ths':0.1},
+        "line": {'paragraph': False, 'text_threshold':0.7, 'width_ths':1.0},
+    }
 
-box_overlay_ratio = max(image.size) / 3200
-draw_bbox_config = {
-    'text_scale': 0.8 * box_overlay_ratio,
-    'text_thickness': max(int(2 * box_overlay_ratio), 1),
-    'text_padding': max(int(3 * box_overlay_ratio), 1),
-    'thickness': max(int(3 * box_overlay_ratio), 1),
-}
-BOX_TRESHOLD = 0.05
+    easyocr_args = mode_to_args[args.mode]
 
-
-easyocr_args={'paragraph': True, 'text_threshold':0.7, 'width_ths':20.0}
-
-
-ocr_bbox_rslt, is_goal_filtered = check_ocr_box(
-    image_path, 
-    display_img = False, 
-    output_bb_format='xyxy', 
-    goal_filtering=None, 
-    easyocr_args=easyocr_args, 
-    use_paddleocr=False,
-    )
-text, ocr_bbox = ocr_bbox_rslt
-
-
-
-# 将easyocr_args转换为列表格式并拼接到output_path
-easyocr_list = [f"{k}_{v}" for k, v in easyocr_args.items()]
-easyocr_suffix = "_".join(easyocr_list)
-output_path = f'./annotated_image_{easyocr_suffix}.png'
-
-
-
-# 调用函数绘制OCR bounding box
-if ocr_bbox and text:
-    draw_ocr_boxes_and_save(image_path, ocr_bbox, text, output_path)
-    print("need batch processing")
-else:
-    print("No OCR bounding boxes found!")
+    ocr_bbox_rslt, is_goal_filtered = check_ocr_box(
+        image_path, 
+        display_img = False, 
+        output_bb_format='xyxy', 
+        goal_filtering=None, 
+        easyocr_args=easyocr_args, 
+        use_paddleocr=False,
+        )
+    text, ocr_bbox = ocr_bbox_rslt
 
 
 
 
+    # Save the image with ocr_bbox
+    # 调用函数绘制OCR bounding box
+    if ocr_bbox and text:
+        draw_ocr_boxes_and_save(image_path, ocr_bbox, text, output_path)
+        print("need batch processing")
+    else:
+        print("No OCR bounding boxes found!")
+        raise ValueError("No OCR bounding boxes found!")
+
+
+    # save the parsed text
+    dict_text = {}
+    for i, text in enumerate(text):
+        dict_text[i] = text
+    with open(os.path.join(output_dir_text, f'{input_filename}_mode-{mode}.json'), 'w') as f:
+        json.dump(dict_text, f, indent=4)
+
+
+
+
+
+if __name__ == "__main__":
+    
+
+    parser = ArgumentParser()
+    parser.add_argument("--image_path",'-i', type=str, default='imgs/google_page.png')
+    parser.add_argument("--mode",'-m', type=str, default='paragraph', choices=['paragraph', 'word', 'line'])
+    args = parser.parse_args()
+
+    main(args)
