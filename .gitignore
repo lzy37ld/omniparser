@@ -12,3 +12,4 @@ wget-log
 weights/icon_caption_florence_v2/
 omnitool/gradio/uploads/
 *.json
+parsed_results/
