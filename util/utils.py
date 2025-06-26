@@ -20,7 +20,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import easyocr
 from paddleocr import PaddleOCR
-reader = easyocr.Reader(['en'])
+reader = easyocr.Reader(['en','ch_sim'],gpu=True)
 paddle_ocr = PaddleOCR(
     lang='en',  # other lang also available
     use_angle_cls=False,

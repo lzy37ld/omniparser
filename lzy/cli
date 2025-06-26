@@ -1,0 +1,57 @@
+# mode paragraph
+
+python lzy/parse_text.py --image_dir /home/t-zeyiliao/ScreenSpot-Pro/images --mode paragraph --split_index 0 --split_num 6 --save_dir ./parsed_results/screenspot_pro --debug
+python lzy/parse_text.py --image_dir /home/t-zeyiliao/ScreenSpot-Pro/images --mode paragraph --split_index 1 --split_num 6 --save_dir ./parsed_results/screenspot_pro --debug
+python lzy/parse_text.py --image_dir /home/t-zeyiliao/ScreenSpot-Pro/images --mode paragraph --split_index 2 --split_num 6 --save_dir ./parsed_results/screenspot_pro --debug
+python lzy/parse_text.py --image_dir /home/t-zeyiliao/ScreenSpot-Pro/images --mode paragraph --split_index 3 --split_num 6 --save_dir ./parsed_results/screenspot_pro --debug
+python lzy/parse_text.py --image_dir /home/t-zeyiliao/ScreenSpot-Pro/images --mode paragraph --split_index 4 --split_num 6 --save_dir ./parsed_results/screenspot_pro --debug
+python lzy/parse_text.py --image_dir /home/t-zeyiliao/ScreenSpot-Pro/images --mode paragraph --split_index 5 --split_num 6 --save_dir ./parsed_results/screenspot_pro --debug
+
+python lzy/parse_text.py --image_dir /home/t-zeyiliao/ScreenSpot-Pro/images --mode paragraph --create_mapping_dict --save_dir ./parsed_results/screenspot_pro --debug
+
+
+
+
+# mode line
+
+python lzy/parse_text.py --image_dir /home/t-zeyiliao/ScreenSpot-Pro/images --mode line --split_index 0 --split_num 6 --save_dir ./parsed_results/screenspot_pro --debug
+python lzy/parse_text.py --image_dir /home/t-zeyiliao/ScreenSpot-Pro/images --mode line --split_index 1 --split_num 6 --save_dir ./parsed_results/screenspot_pro --debug
+python lzy/parse_text.py --image_dir /home/t-zeyiliao/ScreenSpot-Pro/images --mode line --split_index 2 --split_num 6 --save_dir ./parsed_results/screenspot_pro --debug
+python lzy/parse_text.py --image_dir /home/t-zeyiliao/ScreenSpot-Pro/images --mode line --split_index 3 --split_num 6 --save_dir ./parsed_results/screenspot_pro --debug
+python lzy/parse_text.py --image_dir /home/t-zeyiliao/ScreenSpot-Pro/images --mode line --split_index 4 --split_num 6 --save_dir ./parsed_results/screenspot_pro --debug
+python lzy/parse_text.py --image_dir /home/t-zeyiliao/ScreenSpot-Pro/images --mode line --split_index 5 --split_num 6 --save_dir ./parsed_results/screenspot_pro --debug
+
+python lzy/parse_text.py --image_dir /home/t-zeyiliao/ScreenSpot-Pro/images --mode line --create_mapping_dict --save_dir ./parsed_results/screenspot_pro --debug
+
+
+
+
+# mode word
+
+python lzy/parse_text.py --image_dir /home/t-zeyiliao/ScreenSpot-Pro/images --mode word --split_index 0 --split_num 6 --save_dir ./parsed_results/screenspot_pro --debug
+python lzy/parse_text.py --image_dir /home/t-zeyiliao/ScreenSpot-Pro/images --mode word --split_index 1 --split_num 6 --save_dir ./parsed_results/screenspot_pro --debug
+python lzy/parse_text.py --image_dir /home/t-zeyiliao/ScreenSpot-Pro/images --mode word --split_index 2 --split_num 6 --save_dir ./parsed_results/screenspot_pro --debug
+python lzy/parse_text.py --image_dir /home/t-zeyiliao/ScreenSpot-Pro/images --mode word --split_index 3 --split_num 6 --save_dir ./parsed_results/screenspot_pro --debug
+python lzy/parse_text.py --image_dir /home/t-zeyiliao/ScreenSpot-Pro/images --mode word --split_index 4 --split_num 6 --save_dir ./parsed_results/screenspot_pro --debug
+python lzy/parse_text.py --image_dir /home/t-zeyiliao/ScreenSpot-Pro/images --mode word --split_index 5 --split_num 6 --save_dir ./parsed_results/screenspot_pro --debug
+
+python lzy/parse_text.py --image_dir /home/t-zeyiliao/ScreenSpot-Pro/images --mode word --create_mapping_dict --save_dir ./parsed_results/screenspot_pro --debug
+
+
+
+
+
+
+
+
+
+# referring expression gen
+
+python lzy/pipeline_gen_expression.py --image_list_from_mapping_dict /home/t-zeyiliao/OmniParser/parsed_results/screenspot_pro/parsed_mode-line-mapping_dict.json --save_dir /home/t-zeyiliao/OmniParser/referring_expressions/screenspot_pro --model o4-mini-2025-04-16 --category positional --use_async
+
+python lzy/pipeline_gen_expression.py --image_list_from_mapping_dict /home/t-zeyiliao/OmniParser/parsed_results/screenspot_pro/parsed_mode-line-mapping_dict.json --save_dir /home/t-zeyiliao/OmniParser/referring_expressions/screenspot_pro --model o4-mini-2025-04-16 --category semantic --use_async
+
+python lzy/pipeline_gen_expression.py --image_list_from_mapping_dict /home/t-zeyiliao/OmniParser/parsed_results/screenspot_pro/parsed_mode-line-mapping_dict.json --save_dir /home/t-zeyiliao/OmniParser/referring_expressions/screenspot_pro --model o4-mini-2025-04-16 --category visual --use_async
+
+
+python lzy/pipeline_gen_expression.py --image_list_from_mapping_dict /home/t-zeyiliao/OmniParser/parsed_results/screenspot_pro/parsed_mode-line-mapping_dict.json --save_dir /home/t-zeyiliao/OmniParser/referring_expressions/screenspot_pro --model o4-mini-2025-04-16 --category lexical --use_async

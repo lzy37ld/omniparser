@@ -14,10 +14,14 @@ from util.utils import get_som_labeled_img, check_ocr_box, get_caption_model_pro
 from util.box_annotator import BoxAnnotator
 from argparse import ArgumentParser
 import json
+import easyocr
+import time
+from tqdm import tqdm
+from glob import glob
+import random   
 
 
-
-def draw_ocr_boxes_and_save(image_path, ocr_bbox, ocr_text, output_path='./annotated_image.png', text_scale=0.4, text_padding=5, text_thickness=2, thickness=3):
+def draw_ocr_boxes_and_save(image_path, ocr_bbox, ocr_text, output_path='./annotated_image.png', text_scale=0.4, text_padding=5, text_thickness=1, thickness=1):
     """
     绘制OCR检测到的bounding box并保存图片，使用与get_som_labeled_img相同的逻辑
     
@@ -78,38 +82,67 @@ def draw_ocr_boxes_and_save(image_path, ocr_bbox, ocr_text, output_path='./annot
     return annotated_frame, label_coordinates
 
 
+def create_dict_mapping(image_paths, mode, save_dir):
+    dict_mapping_original_to_output = {}
+    dict_mapping_output_to_original = {}
+    for image_path in image_paths:
+        # Convert image_path to absolute path
+        abs_image_path = os.path.abspath(image_path)
+        output_img_path, output_text_path = get_output_path(abs_image_path, mode, save_dir)
+        dict_mapping_original_to_output[abs_image_path] = (output_img_path, output_text_path)
+        dict_mapping_output_to_original[output_img_path] = abs_image_path
+    total_dict = {
+        "original_to_output": dict_mapping_original_to_output,
+        "output_to_original": dict_mapping_output_to_original
+    }
 
-def main(args):
-    image_path = args.image_path
-    mode = args.mode
+    # Convert save_dir to absolute path
+    abs_save_dir = os.path.abspath(save_dir)
+    with open(os.path.join(abs_save_dir, f'parsed_mode-{mode}-mapping_dict.json'), 'w', encoding='utf-8') as f:
+        json.dump(total_dict, f, indent=4, ensure_ascii=False)
 
-    image = Image.open(image_path)
-    image_rgb = image.convert('RGB')
-    print('image size:', image.size)
 
-    # 获取项目根目录（无论从哪个位置运行脚本）
-    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+def get_output_path(image_path, mode, save_dir):
+    # Convert save_dir to absolute path
+    abs_save_dir = os.path.abspath(save_dir)
     
     # 创建输出目录
-    output_dir_img = os.path.join(project_root, 'parsed_text_images')
+    output_dir_img = os.path.join(abs_save_dir, 'parsed_images', f'parsed_mode-{mode}')
+    output_dir_text = os.path.join(abs_save_dir, 'parsed_text_coordinates', f'parsed_mode-{mode}')
+    
+    # 获取输入图片的文件名（不含扩展名）
+    input_filename = os.path.splitext(os.path.basename(image_path))[0]
+    
+    output_img_path = os.path.abspath(os.path.join(output_dir_img, f'name-{input_filename}.png'))
+    assert os.path.exists(output_img_path)
+    
+    output_text_path = os.path.abspath(os.path.join(output_dir_text, f'name-{input_filename}.json'))
+    assert os.path.exists(output_text_path)
+    
+    return output_img_path, output_text_path
+
+    
+
+
+
+
+def parse_image_func(image_path, mode, save_dir):
+
+    # 创建输出目录
+    output_dir_img = os.path.join(save_dir, 'parsed_images', f'parsed_mode-{mode}')
     os.makedirs(output_dir_img, exist_ok=True)
-    output_dir_text = os.path.join(project_root, 'parsed_text_text')
+    output_dir_text = os.path.join(save_dir, 'parsed_text_coordinates', f'parsed_mode-{mode}')
     os.makedirs(output_dir_text, exist_ok=True)
     
     # 获取输入图片的文件名（不含扩展名）
     input_filename = os.path.splitext(os.path.basename(image_path))[0]
     
     # 构建输出路径：项目根目录/parsed_text_images/原文件名_mode.png
-    output_path = os.path.join(output_dir_img, f'{input_filename}_mode-{mode}.png')
+    output_path = os.path.join(output_dir_img, f'name-{input_filename}.png')
+    if os.path.exists(output_path):
+        return
 
-    box_overlay_ratio = max(image.size) / 3200
-    draw_bbox_config = {
-        'text_scale': 0.8 * box_overlay_ratio,
-        'text_thickness': max(int(2 * box_overlay_ratio), 1),
-        'text_padding': max(int(3 * box_overlay_ratio), 1),
-        'thickness': max(int(3 * box_overlay_ratio), 1),
-    }
-    BOX_TRESHOLD = 0.05
 
     mode_to_args = {
         "paragraph": {'paragraph': True, 'text_threshold':0.7, 'width_ths':20.0},
@@ -117,7 +150,9 @@ def main(args):
         "line": {'paragraph': False, 'text_threshold':0.7, 'width_ths':1.0},
     }
 
-    easyocr_args = mode_to_args[args.mode]
+    easyocr_args = mode_to_args[mode]
+
+    easyocr_args['batch_size'] = 50
 
     ocr_bbox_rslt, is_goal_filtered = check_ocr_box(
         image_path, 
@@ -128,9 +163,6 @@ def main(args):
         use_paddleocr=False,
         )
     text, ocr_bbox = ocr_bbox_rslt
-
-
-
 
     # Save the image with ocr_bbox
     # 调用函数绘制OCR bounding box
@@ -143,14 +175,14 @@ def main(args):
 
 
     # save the parsed text
-    dict_text = {}
+    dict_text_coordinate = {}
     for i, text in enumerate(text):
-        dict_text[i] = text
-    with open(os.path.join(output_dir_text, f'{input_filename}_mode-{mode}.json'), 'w') as f:
-        json.dump(dict_text, f, indent=4)
-
-
-
+        dict_text_coordinate[i] = {
+            'text': text,
+            'coordinate': ocr_bbox[i]
+        }
+    with open(os.path.join(output_dir_text, f'name-{input_filename}.json'), 'w', encoding='utf-8') as f:
+        json.dump(dict_text_coordinate, f, indent=4, ensure_ascii=False)
 
 
 if __name__ == "__main__":
@@ -158,7 +190,39 @@ if __name__ == "__main__":
 
     parser = ArgumentParser()
     parser.add_argument("--image_path",'-i', type=str, default='imgs/google_page.png')
+    parser.add_argument("--image_dir",'-id', type=str, default='imgs/')
+    parser.add_argument("--single_image", action='store_true', default=False)
     parser.add_argument("--mode",'-m', type=str, default='paragraph', choices=['paragraph', 'word', 'line'])
+    parser.add_argument("--save_dir",'-s', type=str, default='./parsed_results')
+    parser.add_argument("--debug", action='store_true', default=False)
+    parser.add_argument("--split_index", type=int, default=-1)
+    parser.add_argument("--split_num", type=int, default=4)
+    parser.add_argument("--create_mapping_dict", action='store_true', default=False)
     args = parser.parse_args()
 
-    main(args)
+
+
+    if args.single_image:
+        parse_image_func(args.image_path, args.mode, args.save_dir)
+
+    else:
+        image_paths = glob(os.path.join(args.image_dir, '**/*.png'))
+        if args.debug:
+            debug_num = 100
+            divider = len(image_paths) // debug_num
+            image_paths = image_paths[::divider]
+
+        if args.create_mapping_dict:
+            create_dict_mapping(image_paths, args.mode, args.save_dir)
+            exit()
+
+        if args.split_index == -1:
+            for image_path in tqdm(image_paths, desc = 'OCR processing'):
+                parse_image_func(image_path, args.mode, args.save_dir)
+
+        else:
+            assert args.split_index < args.split_num
+            image_paths = [image_path for index, image_path in enumerate(image_paths) if index % args.split_num == args.split_index]
+
+            for image_path in tqdm(image_paths, desc = 'OCR processing'):
+                parse_image_func(image_path, args.mode, args.save_dir)
